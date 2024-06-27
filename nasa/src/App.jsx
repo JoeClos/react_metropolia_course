@@ -38,18 +38,19 @@ function App() {
   return (
     <>
       <p>Explanation: {explanation}</p>
-      <iframe
+      {/* <iframe
         width="520"
         height="415"
         src={url}
         title="Nasa APOD"
-      ></iframe>{" "}
+      ></iframe>{" "} */}
+      <img src={url} alt="nasa" />
       <p>
         <a
-          href={"https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY"}
+          href={url}
           target="Nasa APOD"
         >
-          Link
+          See the pfoto in a new tab
         </a>
       </p>
     </>
