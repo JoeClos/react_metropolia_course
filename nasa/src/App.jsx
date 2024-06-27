@@ -50,7 +50,7 @@ function App() {
           href={url}
           target="Nasa APOD"
         >
-          See the pfoto in a new tab
+          See the photo in a new tab
         </a>
       </p>
     </>
