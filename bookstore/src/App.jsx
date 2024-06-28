@@ -1,49 +1,103 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import AddBook from './components/AddBook';
+import AddBook from "./components/AddBook";
 import { AgGridReact } from "ag-grid-react";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-import './App.css'
+import "./App.css";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-material.css";
 
 function App() {
+  const [books, setBooks] = useState([]);
 
-  const [books, setBooks] = useState([])
+  const bookColumns = [
+    { field: "title", sortable: true, filter: true, width: 250 },
+    { field: "author", sortable: true, filter: true, width: 250 },
+    { field: "year", sortable: true, filter: true, width: 250 },
+    { field: "isbn", sortable: true, filter: true, width: 250 },
+    { field: "price", sortable: true, filter: true, width: 250 },
+    {
+      headerName: "",
+      field: "id",
+      width: 90,
+      cellRenderer: (params) => (
+        <IconButton
+          onClick={() => deleteBook(params.value)}
+          size="small"
+          color="error"
+        >
+          <DeleteIcon />
+        </IconButton>
+      ),
+    },
+  ];
 
-  const booksColumns = [
-    { field: 'title', sortable: true, filter: true },
-    { field: 'author', sortable: true, filter: true },
-    { field: 'year', sortable: true, filter: true },
-    { field: 'isbn', sortable: true, filter: true},
-    { field: 'price', sortable: true, filter: true}
-  ]
-
+  //fetch books from Firebase Realtime Database
   useEffect(() => {
-    fetchBooks()
-  }, [])
+    // Define fetchBooks inside useEffect
 
-  // fetch books from Firebase Realtime Database
+    fetchBooks();
+  }, []);
+
   const fetchBooks = () => {
-    fetch('https://bookstore-6f530-default-rtdb.europe-west1.firebasedatabase.app/.json')
-      .then(response => response.json())
-      .then(data => setBooks(Object.values(data)))
-      .catch(err => console.error(err))
+    fetch(
+      "https://bookstore-6f530-default-rtdb.europe-west1.firebasedatabase.app/books/.json"
+    )
+      .then((response) => response.json())
+      .then((data) => addKeys(data))
+      .catch((err) => console.error(err));
+  };
+
+  // Add keys into the book objects
+  const addKeys = (data) => {
+    const keys = Object.keys(data);
+    const valueKeys = Object.values(data).map((item, index) =>
+      Object.defineProperty(item, "id", { value: keys[index] })
+    );
+    setBooks(valueKeys);
+  };
+
+  const addBook = (newBook) => {
+    fetch(
+      "https://bookstore-6f530-default-rtdb.europe-west1.firebasedatabase.app/books.json",
+      {
+        method: "POST",
+        body: JSON.stringify(newBook),
+      }
+    )
+      .then(() => fetchBooks()) // Call fetchBooks after adding a new book
+      .catch((err) => console.error(err));
+  };
+
+  const deleteBook = (id) => {
+    fetch(
+      `https://bookstore-6f530-default-rtdb.europe-west1.firebasedatabase.app/books/${id}.json`,
+      {
+        method: "DELETE",
+      }
+    )
+      .then(() => fetchBooks()) // Call fetchBooks after deleting a book
+      .catch((err) => console.error(err));
   }
 
   return (
     <>
-      <AppBar  position="static">
+      <AppBar>
         <Toolbar>
           <Typography variant="h5">Bookstore</Typography>
         </Toolbar>
       </AppBar>
-      <AddBook />
-      <div className="ag-theme-material" style={{ height: 400, width: 700 }}>
-        <AgGridReact rowData={books} columnDefs={booksColumns}/>
+      <AddBook addBook={addBook} />
+
+      <div className="ag-theme-material" style={{ height: 400, width: 1400 }}>
+        <AgGridReact rowData={books} columnDefs={bookColumns} />
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
