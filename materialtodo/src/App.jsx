@@ -9,27 +9,45 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
-import SaveIcon from '@mui/icons-material/Save';
+import SaveIcon from "@mui/icons-material/Save";
+import { v4 as uuidv4 } from "uuid";
+import { DataGrid } from "@mui/x-data-grid";
 
 function App() {
   const [todo, setTodo] = useState({ description: "", date: "" });
   const [todos, setTodos] = useState([]);
+
+  const todoRows = todos.map((todo) => ({
+    id: todo.id,
+    col1: todo.description,
+    col2: todo.date,
+  }));
+
+  const todoColumns = [
+    { field: "col1", headerName: "Description", width: 200 },
+    { field: "col2", headerName: "Date", width: 200 },
+  ];
 
   const inputChanged = (event) => {
     setTodo({ ...todo, [event.target.name]: event.target.value });
   };
 
   const addTodo = () => {
-    setTodos([...todos, todo]);
+    const newTodo = { ...todo, id: uuidv4() };
+    setTodos([...todos, newTodo]);
+    setTodo({
+      description: "",
+      date: "",
+    });
   };
 
-  const deleteTodo = (row) => {
-    setTodos(todos.filter((todo, index) => index !== row));
-  };
+  // const deleteTodo = (row) => {
+  //   setTodos(todos.filter((todo, index) => index !== row));
+  // };
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar>
         <Toolbar>
           <Typography variant="h6">Todolist</Typography>
         </Toolbar>
@@ -59,7 +77,10 @@ function App() {
           Add
         </Button>
       </Stack>
-      <table>
+      <div style={{ height: 300, width: "100%", marginTop: "10px" }}>
+        <DataGrid rows={todoRows} columns={todoColumns} />
+      </div>
+      {/* <table>
         <tbody>
           {todos.map((todo, index) => (
             <tr key={index}>
@@ -74,19 +95,19 @@ function App() {
                   >
                     <DeleteIcon />
                   </IconButton>
-                </Tooltip>
-                {/* <Button
+                </Tooltip> */}
+      {/* <Button
                   onClick={() => deleteTodo(index)}
                   size="small"
                   color="error"
                 >
                   Delete
                 </Button> */}
-              </td>
+      {/* </td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </table> */}
     </>
   );
 }
